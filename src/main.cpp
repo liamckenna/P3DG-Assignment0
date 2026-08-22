@@ -63,17 +63,6 @@ int main()
     
     //---------------------------------------INSTANCE---------------------------------------//
 
-    VkApplicationInfo appplication_info = {
-        .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-        .pNext = nullptr,
-        .pApplicationName = window_title,
-        .applicationVersion = VK_MAKE_API_VERSION(0, 1, 0, 0),
-        .pEngineName = "none",
-        .engineVersion = VK_MAKE_API_VERSION(0, 1, 0, 0),
-
-        .apiVersion = VK_API_VERSION_1_3,
-    };
-
     //glfw needs certain vulkan instance extensions to be enabled to perform core functions like creating a window surface. we query for them here
     uint32_t glfw_extension_count = 0;
     const char** glfw_extensions = glfwGetRequiredInstanceExtensions(&glfw_extension_count);
@@ -102,6 +91,18 @@ int main()
                        VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
         .pfnUserCallback = debug_callback,
         .pUserData = nullptr,
+    };
+
+    //describe our application
+    VkApplicationInfo appplication_info = {
+        .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
+        .pNext = nullptr,
+        .pApplicationName = window_title,
+        .applicationVersion = VK_MAKE_API_VERSION(0, 1, 0, 0),
+        .pEngineName = "none",
+        .engineVersion = VK_MAKE_API_VERSION(0, 1, 0, 0),
+
+        .apiVersion = VK_API_VERSION_1_3,
     };
 
     //describe our Vulkan instance
