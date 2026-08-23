@@ -94,7 +94,7 @@ int main()
     };
 
     //describe our application
-    VkApplicationInfo appplication_info = {
+    VkApplicationInfo application_info = {
         .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
         .pNext = nullptr,
         .pApplicationName = window_title,
@@ -110,7 +110,7 @@ int main()
         .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
         .pNext = &debug_messenger_create_info,
         .flags = 0,
-        .pApplicationInfo = &appplication_info,
+        .pApplicationInfo = &application_info,
         .enabledLayerCount = sizeof(enabled_layers) / sizeof(enabled_layers[0]),
         .ppEnabledLayerNames = enabled_layers,
         .enabledExtensionCount = (uint32_t)instance_extensions.size(),
@@ -119,7 +119,8 @@ int main()
 
     //create our Vulkan instance
     VkInstance instance = VK_NULL_HANDLE;
-    VK_CHECK(vkCreateInstance(&instance_create_info, nullptr, &instance));
+    VkResult instance_creation_result = vkCreateInstance(&instance_create_info, nullptr, &instance);
+    VK_CHECK(instance_creation_result);
 
     //since extension functions are not loaded in by default (after all, they are extensions), we have to query the function as a pointer in order to use it
     PFN_vkCreateDebugUtilsMessengerEXT pfn_create_debug_utils_messengerEXT =
