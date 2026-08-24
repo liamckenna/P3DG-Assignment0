@@ -1,3 +1,4 @@
+#define VK_ENABLE_BETA_EXTENSIONS
 #include <vulkan/vulkan.h>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -5,6 +6,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstdint>
+#include <cstring>
 #include <vector>
 #include <iostream>
 
@@ -35,6 +37,46 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(VkDebugUtilsMessageSeverity
 
     std::fprintf(stderr, "[validation] %s\n", callback_data->pMessage);
     return VK_FALSE;
+}
+
+//check if our physical device supports a certain device extension
+static bool DeviceSupportsExtension(VkPhysicalDevice physical_device, const char* extension_name)
+{
+    uint32_t extension_count = 0;
+    VK_CHECK(vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extension_count, nullptr));
+
+    std::vector<VkExtensionProperties> extensions(extension_count);
+    VK_CHECK(vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extension_count, extensions.data()));
+
+    for (uint32_t i = 0; i < extension_count; ++i)
+    {
+        if (std::strcmp(extensions[i].extensionName, extension_name) == 0)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+//check if our Vulkan instance supports a certain instance extension
+static bool InstanceSupportsExtension(const char* extension_name)
+{
+    uint32_t extension_count = 0;
+    VK_CHECK(vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, nullptr));
+
+    std::vector<VkExtensionProperties> extensions(extension_count);
+    VK_CHECK(vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, extensions.data()));
+
+    for (uint32_t i = 0; i < extension_count; ++i)
+    {
+        if (std::strcmp(extensions[i].extensionName, extension_name) == 0)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 int main()
@@ -77,10 +119,6 @@ int main()
     //let's add the debug extension so that our debug messanger works
     instance_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
-    //mac support
-    instance_extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
-
-
     //enable validation layers that create debug messages
     const char* enabled_layers[] = { "VK_LAYER_KHRONOS_validation" };
 
@@ -110,11 +148,20 @@ int main()
         .apiVersion = VK_API_VERSION_1_3,
     };
 
+    VkInstanceCreateFlags instance_create_flags = 0;
+
+    //mac support
+    if (InstanceSupportsExtension(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME))
+    {
+        instance_extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+        instance_create_flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+    }
+
     //describe our Vulkan instance
     VkInstanceCreateInfo instance_create_info = {
         .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
         .pNext = &debug_messenger_create_info,
-        .flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR, //mac support
+        .flags = instance_create_flags,
         .pApplicationInfo = &application_info,
         .enabledLayerCount = sizeof(enabled_layers) / sizeof(enabled_layers[0]),
         .ppEnabledLayerNames = enabled_layers,
@@ -237,7 +284,13 @@ int main()
     };
 
     //presenting a surface (and by extension, using a swapchain) is not core Vulkan but rather a device extension
-    const char* device_extensions[] = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+    std::vector<const char*> device_extensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+
+    //mac support
+    if (DeviceSupportsExtension(physical_device, VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME))
+    {
+        device_extensions.push_back(VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME);
+    }
 
     //describe our logical device that serves as the interface between our Vulkan instance and our physical device (GPU)
     VkDeviceCreateInfo device_create_info = {
@@ -248,8 +301,8 @@ int main()
         .pQueueCreateInfos = &device_queue_create_info,
         .enabledLayerCount = 0, //deprecated
         .ppEnabledLayerNames = nullptr, //deprecated
-        .enabledExtensionCount = sizeof(device_extensions) / sizeof(device_extensions[0]),
-        .ppEnabledExtensionNames = device_extensions,
+        .enabledExtensionCount = (uint32_t)device_extensions.size(),
+        .ppEnabledExtensionNames = device_extensions.data(),
         .pEnabledFeatures = nullptr,
     };
 
