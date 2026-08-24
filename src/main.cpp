@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <cstdint>
 #include <vector>
+#include <iostream>
 
 //macro function to check the return value of Vulkan API calls. Print an error message and aborts the program if it fails
 #define VK_CHECK(call)                                                  \
@@ -76,6 +77,10 @@ int main()
     //let's add the debug extension so that our debug messanger works
     instance_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
+    //mac support
+    instance_extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+
+
     //enable validation layers that create debug messages
     const char* enabled_layers[] = { "VK_LAYER_KHRONOS_validation" };
 
@@ -109,7 +114,7 @@ int main()
     VkInstanceCreateInfo instance_create_info = {
         .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
         .pNext = &debug_messenger_create_info,
-        .flags = 0,
+        .flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR, //mac support
         .pApplicationInfo = &application_info,
         .enabledLayerCount = sizeof(enabled_layers) / sizeof(enabled_layers[0]),
         .ppEnabledLayerNames = enabled_layers,
@@ -254,7 +259,8 @@ int main()
 
     //retrieve the handle of the queue generated with the logical device
     VkQueue queue = VK_NULL_HANDLE;
-    vkGetDeviceQueue(device, queue_family_index, 0, &queue);
+    uint32_t queue_index = 0;
+    vkGetDeviceQueue(device, queue_family_index, queue_index, &queue);
 
     //---------------------------------------SWAPCHAIN--------------------------------------//
 
