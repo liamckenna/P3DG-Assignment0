@@ -1,5 +1,6 @@
 #define VK_ENABLE_BETA_EXTENSIONS
 #include <vulkan/vulkan.h>
+#include <vulkan/vk_enum_string_helper.h> //if we want to print out enum names
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
@@ -318,10 +319,11 @@ int main()
     //---------------------------------------SWAPCHAIN--------------------------------------//
 
     //let's check if our physical device supports the transfer op we're going to use later
-    //(don't worry, it practically always is)  
+    //(don't worry, it practically always is)
     VkSurfaceCapabilitiesKHR surface_capabilities = {};
     VK_CHECK(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, surface, &surface_capabilities));
 
+    //VK_IMAGE_USAGE_TRANSFER_DST_BIT is the flag that signifies the image can be used as the destination for a transfer op
     if (!(surface_capabilities.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT)) {
         std::fprintf(stderr, "Surface does not support VK_IMAGE_USAGE_TRANSFER_DST_BIT\n");
         return EXIT_FAILURE;
@@ -374,10 +376,10 @@ int main()
         .imageFormat = surface_format.format,
         .imageColorSpace = surface_format.colorSpace,
         .imageExtent = swapchain_extent,
-        // more than 1 only used for stereoscopic rendering
+        //more than 1 only used for stereoscopic rendering
         .imageArrayLayers = 1,
-        // transfer dst is here bc we clear via a transfer command
-        // color attachment won't be used until we have a fully-fledged pipeline
+        //transfer dst is here bc we clear via a transfer command
+        //color attachment won't be used until we have a fully-fledged pipeline
         .imageUsage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
         //"do we plan on sharing these images with other queue families?"
         .imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
@@ -403,7 +405,7 @@ int main()
     std::vector<VkImage> swapchain_images(swapchain_image_count);
     VK_CHECK(vkGetSwapchainImagesKHR(device, swapchain, &swapchain_image_count, swapchain_images.data()));
 
-    //----------------------------COMMAND POOL AND COMMAND BUFFER0--------------------------//
+    //----------------------------COMMAND POOL AND COMMAND BUFFER---------------------------//
 
     //describe our command pool
     VkCommandPoolCreateInfo command_pool_create_info = {
@@ -457,6 +459,7 @@ int main()
         //ask for an image to draw into. the index is not guaranteed to be sequential, so never assume such
         //i.e., it may advance by more than one so don't plan around a consistent index increment
         //semaphores are device side, so the host (our CPU/C++ side) keeps moving
+        //this semaphore receieves the available image signal
         uint32_t image_index = 0;
         VkResult acquire_result = vkAcquireNextImageKHR(device, swapchain, UINT64_MAX, image_available_semaphore, VK_NULL_HANDLE, &image_index);
 
