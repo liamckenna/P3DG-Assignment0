@@ -242,6 +242,11 @@ int main()
             continue;
         }
 
+        if (physical_device != VK_NULL_HANDLE && physical_device_properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU)
+        {
+            continue;
+        }
+
         physical_device = physical_devices[i];
 
         if (physical_device_properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
