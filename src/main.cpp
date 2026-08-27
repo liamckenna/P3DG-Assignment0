@@ -1,7 +1,7 @@
 #define VK_ENABLE_BETA_EXTENSIONS
 #include <vulkan/vulkan.h>
 #include <vulkan/vk_enum_string_helper.h> //if we want to print out enum names
-#define GLFW_INCLUDE_NONE
+#define GLFW_INCLUDE_NONE //"no, do not include OpenGL"
 #include <GLFW/glfw3.h>
 
 #include <cstdio>
@@ -49,10 +49,8 @@ static bool DeviceSupportsExtension(VkPhysicalDevice physical_device, const char
     std::vector<VkExtensionProperties> extensions(extension_count);
     VK_CHECK(vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extension_count, extensions.data()));
 
-    for (uint32_t i = 0; i < extension_count; ++i)
-    {
-        if (std::strcmp(extensions[i].extensionName, extension_name) == 0)
-        {
+    for (uint32_t i = 0; i < extension_count; ++i) {
+        if (std::strcmp(extensions[i].extensionName, extension_name) == 0) {
             return true;
         }
     }
@@ -69,10 +67,8 @@ static bool InstanceSupportsExtension(const char* extension_name)
     std::vector<VkExtensionProperties> extensions(extension_count);
     VK_CHECK(vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, extensions.data()));
 
-    for (uint32_t i = 0; i < extension_count; ++i)
-    {
-        if (std::strcmp(extensions[i].extensionName, extension_name) == 0)
-        {
+    for (uint32_t i = 0; i < extension_count; ++i) {
+        if (std::strcmp(extensions[i].extensionName, extension_name) == 0) {
             return true;
         }
     }
@@ -212,8 +208,7 @@ int main()
         VkPhysicalDeviceProperties physical_device_properties = {};
         vkGetPhysicalDeviceProperties(physical_devices[i], &physical_device_properties);
 
-        if (physical_device_properties.apiVersion < VK_API_VERSION_1_3)
-        {
+        if (physical_device_properties.apiVersion < VK_API_VERSION_1_3) {
             continue;
         }
 
@@ -242,8 +237,7 @@ int main()
             continue;
         }
 
-        if (physical_device != VK_NULL_HANDLE && physical_device_properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU)
-        {
+        if (physical_device != VK_NULL_HANDLE && physical_device_properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU) {
             continue;
         }
 
@@ -393,7 +387,7 @@ int main()
         .preTransform = surface_capabilities.currentTransform,
         .compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
         //FIFO is guaranteed to be supported
-        .presentMode = VK_PRESENT_MODE_FIFO_KHR, 
+        .presentMode = VK_PRESENT_MODE_FIFO_KHR,
         .clipped = VK_TRUE,
         .oldSwapchain = VK_NULL_HANDLE,
     };
@@ -650,8 +644,8 @@ int main()
             return EXIT_FAILURE;
         }
 
-        //now we tell our LOGICAL device (not our GPU, which is our physical device) to become idle
-        //i.e., we wait for everything we've put on the queue to begin execution before giving the host more work 
+        //now we tell host to become idle until the device has completed all processes
+        //i.e., we wait for everything we've put on the queue to complete execution before giving the host more work 
         VK_CHECK(vkDeviceWaitIdle(device));
     }
 
