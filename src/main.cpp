@@ -1,3 +1,6 @@
+//--------------------------------------------------------------------------------------//
+// ASSIGNMENT0: VULKAN SETUP
+//--------------------------------------------------------------------------------------//
 #define VK_ENABLE_BETA_EXTENSIONS
 #include <vulkan/vulkan.h>
 #include <vulkan/vk_enum_string_helper.h> //if we want to print out enum names
