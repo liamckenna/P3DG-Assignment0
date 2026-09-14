@@ -3,3 +3,4 @@ out/
 *.sln
 *.vcxproj*
 .vs/
+validation.txt

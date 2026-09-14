@@ -13,6 +13,9 @@
 #include <cstring>
 #include <vector>
 #include <iostream>
+#include <cmath>
+#include <fstream>
+#include <filesystem>
 
 //macro function to check the return value of Vulkan API calls. Print an error message and aborts the program if it fails
 #define VK_CHECK(call)                                                  \
@@ -40,6 +43,14 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(VkDebugUtilsMessageSeverity
     (void)user_data;
 
     std::fprintf(stderr, "[validation] %s\n", callback_data->pMessage);
+
+    static std::ofstream log_file("validation.txt", std::ios::out | std::ios::trunc);
+
+    if (log_file.is_open()) {
+        log_file << "[validation] " << callback_data->pMessage << "\n";
+        log_file << std::flush;
+    }
+
     return VK_FALSE;
 }
 
@@ -59,6 +70,13 @@ static bool DeviceSupportsExtension(VkPhysicalDevice physical_device, const char
     }
 
     return false;
+}
+
+//set up our validation.txt file
+static std::ofstream& ValidationLog()
+{
+    static std::ofstream log_file("validation.txt", std::ios::out | std::ios::trunc);
+    return log_file;
 }
 
 //check if our Vulkan instance supports a certain instance extension
@@ -103,6 +121,9 @@ int main()
         std::fprintf(stderr, "glfwCreateWindow failed\n");
         return EXIT_FAILURE;
     }
+
+    ValidationLog() << "=== VALIDATION LOG: " << window_title << " ===\n" << std::flush;
+    std::fprintf(stderr, "[info] validation log location: %s\n", std::filesystem::absolute("validation.txt").string().c_str());
     
     //---------------------------------------INSTANCE---------------------------------------//
 
