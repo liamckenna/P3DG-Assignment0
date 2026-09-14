@@ -172,8 +172,7 @@ int main()
     VkInstanceCreateFlags instance_create_flags = 0;
 
     //mac support
-    if (InstanceSupportsExtension(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME))
-    {
+    if (InstanceSupportsExtension(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME)) {
         instance_extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
         instance_create_flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
     }
@@ -311,8 +310,7 @@ int main()
     std::vector<const char*> device_extensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
     //mac support
-    if (DeviceSupportsExtension(physical_device, VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME))
-    {
+    if (DeviceSupportsExtension(physical_device, VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME)) {
         device_extensions.push_back(VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME);
     }
 
